@@ -1,0 +1,9 @@
+BasedOnStyle: WebKit
+
+AlignAfterOpenBracket: Align
+AlwaysBreakAfterReturnType: TopLevel
+BinPackParameters: false
+ColumnLimit: 81
+IndentWidth: 8
+UseTab: Always
+

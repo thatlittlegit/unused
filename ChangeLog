@@ -1,0 +1,6 @@
+2021-03-18  thatlittlegit  <personal@thatlittlegit.tk>
+
+	* .clang-format: Add basic clang-format file with some alright formatting.
+	* meson.build: Add initial Meson build file.
+	* unused.c: Add basic C skeleton that prints all the functions in a file.
+
