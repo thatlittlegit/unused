@@ -1,3 +1,8 @@
+2021-03-19  thatlittlegit  <personal@thatlittlegit.tk>
+	Fixes some memory leaks in unused.c.
+
+	* unused.c: Fix some memory leaks.
+
 2021-03-18  thatlittlegit  <personal@thatlittlegit.tk>
 	Migrate to ANSI C. Why? Why not?
 

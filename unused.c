@@ -189,6 +189,7 @@ process_section(bfd* bfd, struct bfd_section* section, void* _ret)
 	} while (pc < section->vma + section->size && disasm_result > 0);
 
 	fclose(buffer_file);
+	free(info.buffer);
 
 	*ret = reallocarray(*ret, ++ret_len, sizeof(bfd_vma));
 	(*ret)[ret_len - 1] = 0;
@@ -309,15 +310,17 @@ main(int argc, char** argv)
 	for (i = 0; i < dynamic_len; i++)
 		process_symbol(dynamic_symbols[i], references);
 
+	free(references);
 	free(static_symbols);
 	free(dynamic_symbols);
 
 cleanup_bfd:
 	bfd_close(bfd);
-	goto cleanup_none;
+	input = NULL;
 cleanup_stream:
 	if (input)
 		fclose(input);
+	fclose(debug);
 cleanup_none:
 	return status;
 }
