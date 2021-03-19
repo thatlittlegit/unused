@@ -1,4 +1,18 @@
 2021-03-18  thatlittlegit  <personal@thatlittlegit.tk>
+	Migrate to ANSI C. Why? Why not?
+
+	One inspiration for this was the Hundred Rabbits <https://100r.co>,
+	who have written plenty of utilities in ANSI C.
+
+	It's surprisingly not that bad, but I don't know why I do this to
+	myself.
+
+	* unused.c: Get rid of sanity.
+	* unused.c: Define _DEFAULT_SOURCE and _POSIX_C_SOURCE to get access
+	to various functions that aren't available in C89 by default.
+	* meson.build: Use c89 as the default C standard version.
+
+2021-03-18  thatlittlegit  <personal@thatlittlegit.tk>
 	This adds disassembly so then we can actually see what symbols are
 	actually being used. Frankly, it's surprisingly close to done at this
 	point! :D

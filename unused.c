@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#define _POSIX_C_SOURCE 200809L
+#define _DEFAULT_SOURCE
+
 #include <assert.h>
 #include <bfd.h>
 #include <dis-asm.h>
@@ -115,6 +118,7 @@ process_section(bfd* bfd, struct bfd_section* section, void* _ret)
 	int disasm_result;
 	char* number_sign;
 	bfd_vma nouveaux[3];
+	unsigned i;
 
 	bfd_vma** ret = (bfd_vma**)_ret;
 	unsigned ret_len;
@@ -173,7 +177,7 @@ process_section(bfd* bfd, struct bfd_section* section, void* _ret)
 
 		fprintf(debug, " %.8lx> [%d] %s\n", pc, info.insn_type, buffer);
 
-		for (unsigned i = 0; i < 3; i++) {
+		for (i = 0; i < 3; i++) {
 			if (nouveaux[i] == 0)
 				continue;
 
@@ -194,6 +198,7 @@ static void
 process_symbol(struct bfd_symbol* sym, bfd_vma* references)
 {
 	bfd_vma location;
+	unsigned i;
 
 	if (!(sym->section->flags & SEC_CODE))
 		return;
@@ -204,7 +209,7 @@ process_symbol(struct bfd_symbol* sym, bfd_vma* references)
 
 	fprintf(debug, "checking uses of %s (0x%lx)... ", sym->name, location);
 
-	for (unsigned i = 0; references[i] != 0; ++i) {
+	for (i = 0; references[i] != 0; ++i) {
 		if (references[i] == location) {
 			fputs("found!\n", debug);
 			return;
@@ -221,10 +226,13 @@ main(int argc, char** argv)
 	struct options opts;
 	FILE* input;
 
+	bfd* bfd;
 	struct bfd_symbol** static_symbols;
 	unsigned static_len;
 	struct bfd_symbol** dynamic_symbols;
 	unsigned dynamic_len;
+	bfd_vma* references;
+	unsigned i;
 
 	status = EXIT_SUCCESS;
 	input = stdin;
@@ -264,7 +272,7 @@ main(int argc, char** argv)
 		debug = fopen("/dev/null", "r");
 #endif
 
-	bfd* bfd = bfd_openstreamr(opts.filename, NULL, input);
+	bfd = bfd_openstreamr(opts.filename, NULL, input);
 	if (bfd == NULL) {
 		fprintf(stderr, "%s: failed to read input file '%s': %s\n",
 			progname, opts.filename, bfd_errmsg(bfd_get_error()));
@@ -288,7 +296,7 @@ main(int argc, char** argv)
 		goto cleanup_bfd;
 	}
 
-	bfd_vma* references = (bfd_vma*)calloc(2, sizeof(bfd_vma));
+	references = (bfd_vma*)calloc(2, sizeof(bfd_vma));
 
 	/* the start address is implicitly found */
 	references[0] = bfd_get_start_address(bfd);
@@ -296,9 +304,9 @@ main(int argc, char** argv)
 
 	bfd_map_over_sections(bfd, process_section, &references);
 
-	for (unsigned i = 0; i < static_len; i++)
+	for (i = 0; i < static_len; i++)
 		process_symbol(static_symbols[i], references);
-	for (unsigned i = 0; i < dynamic_len; i++)
+	for (i = 0; i < dynamic_len; i++)
 		process_symbol(dynamic_symbols[i], references);
 
 	free(static_symbols);
