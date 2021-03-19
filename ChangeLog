@@ -1,4 +1,10 @@
 2021-03-19  thatlittlegit  <personal@thatlittlegit.tk>
+	Fixes the debug FILE* not having correct permissions, or a potential
+	segfault if /dev/null can't be opened for some reason.
+
+	* unused.c: Fix the debug stream's permissions and error handling.
+
+2021-03-19  thatlittlegit  <personal@thatlittlegit.tk>
 	Fixes some memory leaks in unused.c.
 
 	* unused.c: Fix some memory leaks.

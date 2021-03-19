@@ -268,10 +268,12 @@ main(int argc, char** argv)
 		debug = stderr;
 	else
 #ifdef _WIN32
-		debug = fopen("nul", "r");
+		debug = fopen("nul", "w");
 #else
-		debug = fopen("/dev/null", "r");
+		debug = fopen("/dev/null", "w");
 #endif
+
+	assert(debug != NULL);
 
 	bfd = bfd_openstreamr(opts.filename, NULL, input);
 	if (bfd == NULL) {
