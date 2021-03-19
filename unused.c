@@ -16,6 +16,7 @@
  */
 #include <assert.h>
 #include <bfd.h>
+#include <dis-asm.h>
 #include <errno.h>
 #include <getopt.h>
 #include <stdio.h>
@@ -100,14 +101,117 @@ fail:
 }
 
 static void
-process_symbol(struct bfd_symbol* sym)
+process_section(bfd* bfd, struct bfd_section* section, void* _ret)
 {
-	if (!(sym->flags & BSF_FUNCTION))
-		return;
-	if (sym->value == 0x0)
+	char buffer[1024];
+	FILE* buffer_file;
+
+	enum bfd_architecture arch;
+	unsigned long mach;
+	disassembler_ftype disasm;
+	struct disassemble_info info;
+
+	bfd_vma pc;
+	int disasm_result;
+	char* number_sign;
+	bfd_vma nouveaux[3];
+
+	bfd_vma** ret = (bfd_vma**)_ret;
+	unsigned ret_len;
+
+	if (!(section->flags & SEC_CODE))
 		return;
 
-	fprintf(debug, "function %s discovered\n", sym->name);
+	fprintf(debug, "starting disassembly of section %s\n", section->name);
+
+	arch = bfd_get_arch(bfd);
+	mach = bfd_get_mach(bfd);
+	disasm = disassembler(arch, 0, mach, bfd);
+
+	buffer[0] = 0;
+	buffer_file = fmemopen(buffer, sizeof(buffer), "w");
+	assert(buffer_file);
+
+	init_disassemble_info(&info, buffer_file, (fprintf_ftype)fprintf);
+	info.arch = arch;
+	info.mach = mach;
+	info.buffer_vma = section->vma;
+	info.buffer_length = section->size;
+	info.section = section;
+	bfd_malloc_and_get_section(bfd, section, &info.buffer);
+	disassemble_init_for_target(&info);
+
+	ret_len = 0;
+	if (*ret)
+		for (; (*ret)[ret_len] != 0; ++ret_len)
+			continue;
+
+	pc = section->vma;
+	do {
+		disasm_result = disasm(pc, &info);
+		pc += disasm_result;
+
+		fputc('\0', buffer_file);
+		fflush(buffer_file);
+		rewind(buffer_file);
+
+		memset(nouveaux, 0, sizeof(nouveaux));
+
+		/* HACK there doesn't seem to be a good way to get this
+		 * information otherwise :( */
+		number_sign = strchr(buffer, '#');
+		if (number_sign) {
+			nouveaux[0] = strtoul(number_sign + 4, NULL, 16);
+			*number_sign = 0;
+		}
+
+		if (info.target)
+			nouveaux[1] = info.target;
+
+		if (info.target2)
+			nouveaux[2] = info.target2;
+
+		fprintf(debug, " %.8lx> [%d] %s\n", pc, info.insn_type, buffer);
+
+		for (unsigned i = 0; i < 3; i++) {
+			if (nouveaux[i] == 0)
+				continue;
+
+			*ret = reallocarray(*ret, ++ret_len, sizeof(bfd_vma));
+			(*ret)[ret_len - 1] = nouveaux[i];
+
+			fprintf(debug, "%d--------> 0x%lx\n", i, nouveaux[i]);
+		}
+	} while (pc < section->vma + section->size && disasm_result > 0);
+
+	fclose(buffer_file);
+
+	*ret = reallocarray(*ret, ++ret_len, sizeof(bfd_vma));
+	(*ret)[ret_len - 1] = 0;
+}
+
+static void
+process_symbol(struct bfd_symbol* sym, bfd_vma* references)
+{
+	bfd_vma location;
+
+	if (!(sym->section->flags & SEC_CODE))
+		return;
+	if (sym->value == 0)
+		return;
+
+	location = sym->value + sym->section->vma;
+
+	fprintf(debug, "checking uses of %s (0x%lx)... ", sym->name, location);
+
+	for (unsigned i = 0; references[i] != 0; ++i) {
+		if (references[i] == location) {
+			fputs("found!\n", debug);
+			return;
+		}
+	}
+
+	fputs("not found...\n", debug);
 }
 
 int
@@ -184,10 +288,18 @@ main(int argc, char** argv)
 		goto cleanup_bfd;
 	}
 
+	bfd_vma* references = (bfd_vma*)calloc(2, sizeof(bfd_vma));
+
+	/* the start address is implicitly found */
+	references[0] = bfd_get_start_address(bfd);
+	references[1] = 0;
+
+	bfd_map_over_sections(bfd, process_section, &references);
+
 	for (unsigned i = 0; i < static_len; i++)
-		process_symbol(static_symbols[i]);
+		process_symbol(static_symbols[i], references);
 	for (unsigned i = 0; i < dynamic_len; i++)
-		process_symbol(dynamic_symbols[i]);
+		process_symbol(dynamic_symbols[i], references);
 
 	free(static_symbols);
 	free(dynamic_symbols);

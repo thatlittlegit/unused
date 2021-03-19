@@ -4,6 +4,7 @@ project('unused', 'c',
 
 deps = [
   meson.get_compiler('c').find_library('bfd'),
+  meson.get_compiler('c').find_library('opcodes'),
 ]
 
 exe = executable('unused', 'unused.c',

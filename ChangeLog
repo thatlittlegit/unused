@@ -1,4 +1,12 @@
 2021-03-18  thatlittlegit  <personal@thatlittlegit.tk>
+	This adds disassembly so then we can actually see what symbols are
+	actually being used. Frankly, it's surprisingly close to done at this
+	point! :D
+
+	* unused.c: Use libopcodes to do disassembly.
+	* meson.build: Add libopcodes as a dependency.
+
+2021-03-18  thatlittlegit  <personal@thatlittlegit.tk>
 
 	* .clang-format: Add basic clang-format file with some alright formatting.
 	* meson.build: Add initial Meson build file.
