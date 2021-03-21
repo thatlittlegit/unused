@@ -1,3 +1,11 @@
+2021-03-21  thatlittlegit  <personal@thatlittlegit.tk>
+	Allows compilation with C++. This isn't very well supported by Meson
+	at this point, but it does mean that we meet higher type-safety
+	standards. I mean, we cast everything, but oh well.
+
+	* unused.c: Allow compilation with C++ by adding casts on
+	reallocarray.
+
 2021-03-19  thatlittlegit  <personal@thatlittlegit.tk>
 	Fixes the debug FILE* not having correct permissions, or a potential
 	segfault if /dev/null can't be opened for some reason.

@@ -181,7 +181,8 @@ process_section(bfd* bfd, struct bfd_section* section, void* _ret)
 			if (nouveaux[i] == 0)
 				continue;
 
-			*ret = reallocarray(*ret, ++ret_len, sizeof(bfd_vma));
+			*ret = (bfd_vma*)reallocarray(*ret, ++ret_len,
+						      sizeof(bfd_vma));
 			(*ret)[ret_len - 1] = nouveaux[i];
 
 			fprintf(debug, "%d--------> 0x%lx\n", i, nouveaux[i]);
@@ -191,7 +192,7 @@ process_section(bfd* bfd, struct bfd_section* section, void* _ret)
 	fclose(buffer_file);
 	free(info.buffer);
 
-	*ret = reallocarray(*ret, ++ret_len, sizeof(bfd_vma));
+	*ret = (bfd_vma*)reallocarray(*ret, ++ret_len, sizeof(bfd_vma));
 	(*ret)[ret_len - 1] = 0;
 }
 
