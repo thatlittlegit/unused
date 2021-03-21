@@ -40,6 +40,12 @@ struct definition {
 	unsigned id;
 };
 
+struct fake_fprintf_data {
+	FILE* stream;
+	int waiting;
+	bfd_vma value;
+};
+
 static int
 parse_options(int argc, char** argv, struct options* opts)
 {
@@ -103,10 +109,49 @@ fail:
 	return -1;
 }
 
+static int
+fake_fprintf(struct fake_fprintf_data* data, const char* str, const char* arg)
+{
+	/*
+	 * NOTE: libopcodes does really weird stuff with fprintf. It is used
+	 * for formatting, but it gets strings like "       #" *then* "0x%s",
+	 * instead of doing it all at once. Why? No clue. However, this
+	 * function looks for the earlier '#', and sets a flag indicating it
+	 * should intercept the next string.
+	 *
+	 * If this changes in future, then this will have to change too. I'm
+	 * pretty sure that libopcodes statically links, though, so it should
+	 * be fixable. (Besides, we assert based on sizeof(bfd) at the very
+	 * start.)
+	 */
+	const char* number_sign;
+
+	if (data->waiting) {
+		data->value = strtoul(arg, NULL, 16);
+		data->waiting = 0;
+		return 0;
+	}
+
+	if (str[0] == ' ') {
+		number_sign = strchr(str, '#');
+
+		if (number_sign != NULL) {
+			data->waiting = 1;
+			return 0;
+		}
+	}
+
+	if (debug)
+		return fprintf(data->stream, str, arg);
+
+	return 0;
+}
+
 static void
 process_section(bfd* bfd, struct bfd_section* section, void* _ret)
 {
 	char buffer[1024];
+	struct fake_fprintf_data fprintf_data;
 	FILE* buffer_file;
 
 	enum bfd_architecture arch;
@@ -116,7 +161,6 @@ process_section(bfd* bfd, struct bfd_section* section, void* _ret)
 
 	bfd_vma pc;
 	int disasm_result;
-	char* number_sign;
 	bfd_vma nouveaux[3];
 	unsigned i;
 
@@ -136,7 +180,12 @@ process_section(bfd* bfd, struct bfd_section* section, void* _ret)
 	buffer_file = fmemopen(buffer, sizeof(buffer), "w");
 	assert(buffer_file);
 
-	init_disassemble_info(&info, buffer_file, (fprintf_ftype)fprintf);
+	fprintf_data.stream = buffer_file;
+	fprintf_data.waiting = 0;
+	fprintf_data.value = 0;
+
+	init_disassemble_info(&info, (FILE*)&fprintf_data,
+			      (fprintf_ftype)fake_fprintf);
 	info.arch = arch;
 	info.mach = mach;
 	info.buffer_vma = section->vma;
@@ -161,13 +210,8 @@ process_section(bfd* bfd, struct bfd_section* section, void* _ret)
 
 		memset(nouveaux, 0, sizeof(nouveaux));
 
-		/* HACK there doesn't seem to be a good way to get this
-		 * information otherwise :( */
-		number_sign = strchr(buffer, '#');
-		if (number_sign) {
-			nouveaux[0] = strtoul(number_sign + 4, NULL, 16);
-			*number_sign = 0;
-		}
+		if (fprintf_data.value)
+			nouveaux[0] = fprintf_data.value;
 
 		if (info.target)
 			nouveaux[1] = info.target;

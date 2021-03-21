@@ -1,4 +1,14 @@
 2021-03-21  thatlittlegit  <personal@thatlittlegit.tk>
+	Use a custom function to replace fprintf unless we're in debug mode.
+
+	fake_fprintf() avoids running fprintf, and it is a lot faster! I found
+	before I could run this on libxul.so as a test, and it not once
+	started printing anything out. Now? Thirty seconds or so and we're
+	printing. Incredible.
+
+	* unused.c: Use a custom function to replace fprintf.
+
+2021-03-21  thatlittlegit  <personal@thatlittlegit.tk>
 	Allows compilation with C++. This isn't very well supported by Meson
 	at this point, but it does mean that we meet higher type-safety
 	standards. I mean, we cast everything, but oh well.
