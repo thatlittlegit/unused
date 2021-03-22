@@ -17,6 +17,7 @@
 #define _POSIX_C_SOURCE 200809L
 #define _DEFAULT_SOURCE
 
+#include "debug.h"
 #include "dict.h"
 #include <assert.h>
 #include <bfd.h>
@@ -28,7 +29,6 @@
 #include <string.h>
 
 const char* progname = "unused";
-FILE* debug;
 
 struct options {
 	const char* filename;
@@ -142,7 +142,7 @@ fake_fprintf(struct fake_fprintf_data* data, const char* str, const char* arg)
 		}
 	}
 
-	if (debug)
+	if (debug_stream)
 		return fprintf(data->stream, str, arg);
 
 	return 0;
@@ -168,7 +168,7 @@ process_section(bfd* bfd, struct bfd_section* section, void* _data)
 	if (!(section->flags & SEC_CODE))
 		return;
 
-	fprintf(debug, "starting disassembly of section %s\n", section->name);
+	debug("starting disassembly of section %s\n", section->name);
 
 	arch = bfd_get_arch(bfd);
 	mach = bfd_get_mach(bfd);
@@ -204,20 +204,20 @@ process_section(bfd* bfd, struct bfd_section* section, void* _data)
 		rewind(buffer_file);
 
 
-		fprintf(debug, " %.8lx> [%d] %s\n", pc, info.insn_type, buffer);
+		debug(" %.8lx> [%d] %s\n", pc, info.insn_type, buffer);
 
 		if (fprintf_data.value) {
-			fprintf(debug, " 0-------> %lx\n", fprintf_data.value);
+			debug(" 0-------> %lx\n", fprintf_data.value);
 			uu_dict_remove(dict, fprintf_data.value);
 		}
 
 		if (info.target) {
-			fprintf(debug, " 1-------> %lx\n", info.target);
+			debug(" 1-------> %lx\n", info.target);
 			uu_dict_remove(dict, info.target);
 		}
 
 		if (info.target2) {
-			fprintf(debug, " 2-------> %lx\n", info.target2);
+			debug(" 2-------> %lx\n", info.target2);
 			uu_dict_remove(dict, info.target2);
 		}
 	} while (pc < section->vma + section->size && disasm_result > 0);
@@ -283,15 +283,9 @@ main(int argc, char** argv)
 		opts.filename = "(stdin)";
 
 	if (opts.debug)
-		debug = stderr;
+		debug_stream = stderr;
 	else
-#ifdef _WIN32
-		debug = fopen("nul", "w");
-#else
-		debug = fopen("/dev/null", "w");
-#endif
-
-	assert(debug != NULL);
+		debug_stream = NULL;
 
 	bfd = bfd_openstreamr(opts.filename, NULL, input);
 	if (bfd == NULL) {
@@ -348,7 +342,6 @@ cleanup_bfd:
 cleanup_stream:
 	if (input)
 		fclose(input);
-	fclose(debug);
 cleanup_none:
 	return status;
 }

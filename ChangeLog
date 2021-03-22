@@ -1,4 +1,14 @@
 2021-03-21  thatlittlegit  <personal@thatlittlegit.tk>
+	Only fprintf to debug if we're actually in debug mode.
+
+	It turns out this saves 7s with libxul!
+
+	* debug.h: Add a debugging function header.
+	* debug.c: Add a waste of space.
+	* unused.c: Use debug() instead of fprintf(debug).
+	* meson.build: Build debug.c.
+
+2021-03-21  thatlittlegit  <personal@thatlittlegit.tk>
 	Use a dictionary to keep track of functions instead of lists.
 
 	This means that we no longer have to look through the list of symbols
