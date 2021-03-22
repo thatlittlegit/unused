@@ -210,6 +210,7 @@ process_section(bfd* bfd, struct bfd_section* section, void* _data)
 		if (fprintf_data.value) {
 			debug(" 0-------> %lx\n", fprintf_data.value);
 			uu_dict_remove(dict, fprintf_data.value);
+			fprintf_data.value = 0;
 		}
 
 		if (info.target) {

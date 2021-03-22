@@ -1,4 +1,13 @@
 2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
+	Only remove the symbol from the table when we see it.
+
+	We wouldn't reset fprintf_data.value, and therefore we would call
+	uu_dict_remove on every instruction. I think this shaves a second, but
+	I don't think it's that much (probably more chance.)
+
+	* unused.c: Reset fprintf_data.value between iterations.
+
+2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
 	Only buffer the disassembly if we're actually going to look at it.
 
 	We used to need to do all of this, but now with fake_fprintf there's
