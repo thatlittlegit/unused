@@ -1,4 +1,7 @@
 2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
+	* meson.build: Reformat.
+
+2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
 	Clean up include statements with include-what-you-use.
 
 	* backend.h: Forward-declare uu_dict.
