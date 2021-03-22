@@ -1,4 +1,11 @@
 2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
+	This adds an option for which disassembler to use. The default is, and
+	will likely remain, libopcodes.
+
+	* meson.build: Only build libopcodes support if told.
+	* meson_options.txt: Add an option to select the disassembler.
+
+2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
 	* meson.build: Reformat.
 
 2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>

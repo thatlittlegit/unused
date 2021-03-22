@@ -4,15 +4,20 @@ project('unused', 'c',
 
 deps = [
   meson.get_compiler('c').find_library('bfd'),
-  meson.get_compiler('c').find_library('opcodes'),
 ]
 
 src = files(
-  'backend/libopcodes.c',
   'debug.c',
   'dict.c',
   'unused.c',
 )
+
+summary('backend', get_option('disassembler'))
+
+if get_option('disassembler') == 'libopcodes'
+  deps += meson.get_compiler('c').find_library('opcodes')
+  src += files('backend/libopcodes.c')
+endif
 
 exe = executable('unused', src,
   dependencies: deps,
