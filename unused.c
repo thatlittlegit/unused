@@ -17,6 +17,7 @@
 #define _POSIX_C_SOURCE 200809L
 #define _DEFAULT_SOURCE
 
+#include "dict.h"
 #include <assert.h>
 #include <bfd.h>
 #include <dis-asm.h>
@@ -148,7 +149,7 @@ fake_fprintf(struct fake_fprintf_data* data, const char* str, const char* arg)
 }
 
 static void
-process_section(bfd* bfd, struct bfd_section* section, void* _ret)
+process_section(bfd* bfd, struct bfd_section* section, void* _data)
 {
 	char buffer[1024];
 	struct fake_fprintf_data fprintf_data;
@@ -161,11 +162,8 @@ process_section(bfd* bfd, struct bfd_section* section, void* _ret)
 
 	bfd_vma pc;
 	int disasm_result;
-	bfd_vma nouveaux[3];
-	unsigned i;
 
-	bfd_vma** ret = (bfd_vma**)_ret;
-	unsigned ret_len;
+	struct uu_dict* dict;
 
 	if (!(section->flags & SEC_CODE))
 		return;
@@ -194,10 +192,7 @@ process_section(bfd* bfd, struct bfd_section* section, void* _ret)
 	bfd_malloc_and_get_section(bfd, section, &info.buffer);
 	disassemble_init_for_target(&info);
 
-	ret_len = 0;
-	if (*ret)
-		for (; (*ret)[ret_len] != 0; ++ret_len)
-			continue;
+	dict = (struct uu_dict*)_data;
 
 	pc = section->vma;
 	do {
@@ -208,61 +203,37 @@ process_section(bfd* bfd, struct bfd_section* section, void* _ret)
 		fflush(buffer_file);
 		rewind(buffer_file);
 
-		memset(nouveaux, 0, sizeof(nouveaux));
-
-		if (fprintf_data.value)
-			nouveaux[0] = fprintf_data.value;
-
-		if (info.target)
-			nouveaux[1] = info.target;
-
-		if (info.target2)
-			nouveaux[2] = info.target2;
 
 		fprintf(debug, " %.8lx> [%d] %s\n", pc, info.insn_type, buffer);
 
-		for (i = 0; i < 3; i++) {
-			if (nouveaux[i] == 0)
-				continue;
+		if (fprintf_data.value) {
+			fprintf(debug, " 0-------> %lx\n", fprintf_data.value);
+			uu_dict_remove(dict, fprintf_data.value);
+		}
 
-			*ret = (bfd_vma*)reallocarray(*ret, ++ret_len,
-						      sizeof(bfd_vma));
-			(*ret)[ret_len - 1] = nouveaux[i];
+		if (info.target) {
+			fprintf(debug, " 1-------> %lx\n", info.target);
+			uu_dict_remove(dict, info.target);
+		}
 
-			fprintf(debug, "%d--------> 0x%lx\n", i, nouveaux[i]);
+		if (info.target2) {
+			fprintf(debug, " 2-------> %lx\n", info.target2);
+			uu_dict_remove(dict, info.target2);
 		}
 	} while (pc < section->vma + section->size && disasm_result > 0);
 
 	fclose(buffer_file);
 	free(info.buffer);
-
-	*ret = (bfd_vma*)reallocarray(*ret, ++ret_len, sizeof(bfd_vma));
-	(*ret)[ret_len - 1] = 0;
 }
 
 static void
-process_symbol(struct bfd_symbol* sym, bfd_vma* references)
+process_symbol(struct bfd_symbol* sym, void* data)
 {
 	bfd_vma location;
-	unsigned i;
-
-	if (!(sym->section->flags & SEC_CODE))
-		return;
-	if (sym->value == 0)
-		return;
+	(void)data;
 
 	location = sym->value + sym->section->vma;
-
-	fprintf(debug, "checking uses of %s (0x%lx)... ", sym->name, location);
-
-	for (i = 0; references[i] != 0; ++i) {
-		if (references[i] == location) {
-			fputs("found!\n", debug);
-			return;
-		}
-	}
-
-	fputs("not found...\n", debug);
+	fprintf(stdout, "%lx\t%s\n", location, sym->name);
 }
 
 int
@@ -277,7 +248,9 @@ main(int argc, char** argv)
 	unsigned static_len;
 	struct bfd_symbol** dynamic_symbols;
 	unsigned dynamic_len;
-	bfd_vma* references;
+
+	struct uu_dict* table;
+
 	unsigned i;
 
 	status = EXIT_SUCCESS;
@@ -344,20 +317,28 @@ main(int argc, char** argv)
 		goto cleanup_bfd;
 	}
 
-	references = (bfd_vma*)calloc(2, sizeof(bfd_vma));
+	table = uu_dict_new();
 
-	/* the start address is implicitly found */
-	references[0] = bfd_get_start_address(bfd);
-	references[1] = 0;
+	for (i = 0; i < static_len + dynamic_len; i++) {
+		struct bfd_symbol* sym;
 
-	bfd_map_over_sections(bfd, process_section, &references);
+		if (i < static_len)
+			sym = static_symbols[i];
+		else
+			sym = dynamic_symbols[i - static_len];
 
-	for (i = 0; i < static_len; i++)
-		process_symbol(static_symbols[i], references);
-	for (i = 0; i < dynamic_len; i++)
-		process_symbol(dynamic_symbols[i], references);
+		if (!(sym->section->flags & SEC_CODE))
+			continue;
+		if (sym->value == 0)
+			continue;
 
-	free(references);
+		uu_dict_add(table, sym->value + sym->section->vma, sym);
+	}
+
+	bfd_map_over_sections(bfd, process_section, table);
+	uu_dict_for_each(table, (void (*)(void*, void*))process_symbol, NULL);
+
+	uu_dict_free(table);
 	free(static_symbols);
 	free(dynamic_symbols);
 

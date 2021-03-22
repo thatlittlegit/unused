@@ -1,4 +1,15 @@
 2021-03-21  thatlittlegit  <personal@thatlittlegit.tk>
+	Use a dictionary to keep track of functions instead of lists.
+
+	This means that we no longer have to look through the list of symbols
+	so much, and thus can be very fast. libxul takes 17s (!) now!
+
+	* dict.h: Add a dictionary header.
+	* dict.c: Add a basic dictionary implementation.
+	* unused.c: Use a dictionary instead of arrays to store symbols.
+	* meson.build: Build dict.c.
+
+2021-03-21  thatlittlegit  <personal@thatlittlegit.tk>
 	Use a custom function to replace fprintf unless we're in debug mode.
 
 	fake_fprintf() avoids running fprintf, and it is a lot faster! I found
