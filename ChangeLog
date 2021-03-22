@@ -1,3 +1,9 @@
+2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
+	Reorganize fake_fprintf a little. No real change, found when trying to
+	optimize (unsuccessfully).
+
+	* unused.c: Reorganize fake_fprintf
+
 2021-03-21  thatlittlegit  <personal@thatlittlegit.tk>
 	Only fprintf to debug if we're actually in debug mode.
 

@@ -125,21 +125,15 @@ fake_fprintf(struct fake_fprintf_data* data, const char* str, const char* arg)
 	 * be fixable. (Besides, we assert based on sizeof(bfd) at the very
 	 * start.)
 	 */
-	const char* number_sign;
-
 	if (data->waiting) {
 		data->value = strtoul(arg, NULL, 16);
 		data->waiting = 0;
 		return 0;
 	}
 
-	if (str[0] == ' ') {
-		number_sign = strchr(str, '#');
-
-		if (number_sign != NULL) {
-			data->waiting = 1;
-			return 0;
-		}
+	if (str[0] == ' ' && strchr(str, '#')) {
+		data->waiting = 1;
+		return 0;
 	}
 
 	if (debug_stream)
