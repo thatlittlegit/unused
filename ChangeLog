@@ -1,4 +1,17 @@
 2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
+	Separate the libopcodes backend into a separate file.
+
+	Now, more backends can be fairly easily added. I'll need to do some
+	work with the Meson file first, but that's just making it look better.
+	Then, just implementing uu_backend creates an entire new backend with
+	minimal work.
+
+	* backend/libopcodes.c, unused.c: Separate the libopcodes backend.
+	* unused.c: Use uu_backend instead of process_section.
+	* backend.h: Add a header for uu_backend.
+	* meson.build: Also build backend/libopcodes.c.
+
+2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
 	Only remove the symbol from the table when we see it.
 
 	We wouldn't reset fprintf_data.value, and therefore we would call

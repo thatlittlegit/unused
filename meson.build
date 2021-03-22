@@ -7,6 +7,6 @@ deps = [
   meson.get_compiler('c').find_library('opcodes'),
 ]
 
-exe = executable('unused', ['debug.c', 'dict.c', 'unused.c'],
+exe = executable('unused', ['backend/libopcodes.c', 'debug.c', 'dict.c', 'unused.c'],
   dependencies: deps,
   install : true)
