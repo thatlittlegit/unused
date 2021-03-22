@@ -21,9 +21,11 @@
 #include "../dict.h"
 #include <alloca.h>
 #include <assert.h>
+#include <bfd.h>
 #include <dis-asm.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct fake_fprintf_data {
 	FILE* stream;

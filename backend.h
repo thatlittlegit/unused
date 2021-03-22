@@ -17,8 +17,9 @@
 #ifndef UU_BACKEND_H
 #define UU_BACKEND_H
 
-#include "dict.h"
 #include <bfd.h>
+
+struct uu_dict;
 
 void
 uu_backend(bfd* bfd, struct bfd_section* section, struct uu_dict* dict);

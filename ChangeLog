@@ -1,4 +1,12 @@
 2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
+	Clean up include statements with include-what-you-use.
+
+	* backend.h: Forward-declare uu_dict.
+	* backend/libopcodes.c: Include string.h and bfd.h instead of relying
+	on other files.
+	* dict.h, dict.h: Remove include of <stdint.h>.
+
+2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
 	Separate the libopcodes backend into a separate file.
 
 	Now, more backends can be fairly easily added. I'll need to do some

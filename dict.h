@@ -17,8 +17,6 @@
 #ifndef UU_DICT_H
 #define UU_DICT_H
 
-#include <stdint.h>
-
 #define UU_DICT_THIRD_COUNT (65536)
 #define UU_DICT_THIRD_MASK (0xffff)
 #define UU_DICT_SECOND_COUNT (256)
