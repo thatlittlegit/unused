@@ -145,7 +145,7 @@ fake_fprintf(struct fake_fprintf_data* data, const char* str, const char* arg)
 static void
 process_section(bfd* bfd, struct bfd_section* section, void* _data)
 {
-	char buffer[1024];
+	char* buffer;
 	struct fake_fprintf_data fprintf_data;
 	FILE* buffer_file;
 
@@ -168,9 +168,15 @@ process_section(bfd* bfd, struct bfd_section* section, void* _data)
 	mach = bfd_get_mach(bfd);
 	disasm = disassembler(arch, 0, mach, bfd);
 
-	buffer[0] = 0;
-	buffer_file = fmemopen(buffer, sizeof(buffer), "w");
-	assert(buffer_file);
+	if (debug_stream) {
+		buffer = alloca(1024);
+		buffer[0] = 0;
+		buffer_file = fmemopen(buffer, 1024, "w");
+		assert(buffer_file);
+	} else {
+		buffer = NULL;
+		buffer_file = NULL;
+	}
 
 	fprintf_data.stream = buffer_file;
 	fprintf_data.waiting = 0;
@@ -193,10 +199,11 @@ process_section(bfd* bfd, struct bfd_section* section, void* _data)
 		disasm_result = disasm(pc, &info);
 		pc += disasm_result;
 
-		fputc('\0', buffer_file);
-		fflush(buffer_file);
-		rewind(buffer_file);
-
+		if (debug_stream) {
+			fputc('\0', buffer_file);
+			fflush(buffer_file);
+			rewind(buffer_file);
+		}
 
 		debug(" %.8lx> [%d] %s\n", pc, info.insn_type, buffer);
 
@@ -216,7 +223,8 @@ process_section(bfd* bfd, struct bfd_section* section, void* _data)
 		}
 	} while (pc < section->vma + section->size && disasm_result > 0);
 
-	fclose(buffer_file);
+	if (buffer_file)
+		fclose(buffer_file);
 	free(info.buffer);
 }
 

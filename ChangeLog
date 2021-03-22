@@ -1,4 +1,12 @@
 2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
+	Only buffer the disassembly if we're actually going to look at it.
+
+	We used to need to do all of this, but now with fake_fprintf there's
+	no need to.
+
+	* unused.c: Only buffer disassembly if needed.
+
+2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
 	Reorganize fake_fprintf a little. No real change, found when trying to
 	optimize (unsuccessfully).
 
