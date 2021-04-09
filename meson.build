@@ -19,6 +19,11 @@ if get_option('disassembler') == 'libopcodes'
   src += files('backend/libopcodes.c')
 endif
 
+if get_option('disassembler') == 'bddisasm'
+  deps += dependency('libbddisasm')
+  src += files('backend/libbddisasm.c')
+endif
+
 exe = executable('unused', src,
   dependencies: deps,
   install: true)

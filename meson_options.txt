@@ -1,6 +1,7 @@
 option('disassembler', type: 'combo',
   description: 'The disassembling backend to use.',
   choices: [
+    'bddisasm',
     'libopcodes',
   ],
   value: 'libopcodes')

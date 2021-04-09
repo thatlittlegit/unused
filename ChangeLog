@@ -1,4 +1,13 @@
 2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
+	Adds a BdDisasm backend. This is faster, but seems to give slightly
+	different results; it seems to be fairly close, though.
+
+	Committed 2021-04-09.
+
+	* backends/libbddisasm.c: Add a bddisasm backend.
+	* meson.build, meson_options.txt: Add a bddisasm option.
+
+2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
 	This adds an option for which disassembler to use. The default is, and
 	will likely remain, libopcodes.
 
