@@ -106,20 +106,6 @@ uu_dict_remove(struct uu_dict* dict, unsigned long key)
 	(*location)[key & UU_DICT_THIRD_MASK] = NULL;
 }
 
-void*
-uu_dict_lookup(struct uu_dict* dict, unsigned long key)
-{
-	void*** location = uu_dict_find_location(dict, key);
-
-	if (location == NULL)
-		return NULL;
-
-	if (*location == NULL)
-		return NULL;
-
-	return (*location)[key & UU_DICT_THIRD_MASK];
-}
-
 void
 uu_dict_for_each(struct uu_dict* dict,
 		 void (*func)(void* elem, void* data),

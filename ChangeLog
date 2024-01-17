@@ -1,4 +1,11 @@
 2024-01-17  Duncan McIntosh  <duncan82013@live.ca>
+	Remove uu_dict_lookup, as it's (ironically) unused.
+
+	Found with unused itself!
+	* dict.c: Remove implementation.
+	* dict.h: Remove prototype.
+
+2024-01-17  Duncan McIntosh  <duncan82013@live.ca>
 	Add some documentation.
 
 	This includes an mdoc-based manual page and README, to try and make

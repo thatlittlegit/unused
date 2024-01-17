@@ -50,8 +50,6 @@ void
 uu_dict_add(struct uu_dict* dict, unsigned long key, void* value);
 void
 uu_dict_remove(struct uu_dict* dict, unsigned long key);
-void*
-uu_dict_lookup(struct uu_dict* dict, unsigned long key);
 
 void
 uu_dict_for_each(struct uu_dict* dict,
