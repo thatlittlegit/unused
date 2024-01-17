@@ -65,6 +65,13 @@ fake_fprintf(struct fake_fprintf_data* data, const char* str, const char* arg)
 	return 0;
 }
 
+static int
+fake_styled_fprintf(struct fake_fprintf_data* data, enum disassembler_style ignore, const char* str, const char* arg)
+{
+	(void)ignore;
+	return fake_fprintf(data, str, arg);
+}
+
 void
 uu_backend(bfd* bfd, struct bfd_section* section, struct uu_dict* dict)
 {
@@ -104,7 +111,8 @@ uu_backend(bfd* bfd, struct bfd_section* section, struct uu_dict* dict)
 	fprintf_data.value = 0;
 
 	init_disassemble_info(&info, (FILE*)&fprintf_data,
-			      (fprintf_ftype)fake_fprintf);
+			      (fprintf_ftype)fake_fprintf,
+			      (fprintf_styled_ftype)fake_styled_fprintf);
 	info.arch = arch;
 	info.mach = mach;
 	info.buffer_vma = section->vma;
