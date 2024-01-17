@@ -6,7 +6,7 @@
 
 	* backends/libopcodes.c: Add a thunk for fprintf_styled_ftype.
 
-2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
+2021-03-22  thatlittlegit  <duncan82013@live.ca>
 	Adds a BdDisasm backend. This is faster, but seems to give slightly
 	different results; it seems to be fairly close, though.
 
@@ -15,17 +15,17 @@
 	* backends/libbddisasm.c: Add a bddisasm backend.
 	* meson.build, meson_options.txt: Add a bddisasm option.
 
-2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
+2021-03-22  thatlittlegit  <duncan82013@live.ca>
 	This adds an option for which disassembler to use. The default is, and
 	will likely remain, libopcodes.
 
 	* meson.build: Only build libopcodes support if told.
 	* meson_options.txt: Add an option to select the disassembler.
 
-2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
+2021-03-22  thatlittlegit  <duncan82013@live.ca>
 	* meson.build: Reformat.
 
-2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
+2021-03-22  thatlittlegit  <duncan82013@live.ca>
 	Clean up include statements with include-what-you-use.
 
 	* backend.h: Forward-declare uu_dict.
@@ -33,7 +33,7 @@
 	on other files.
 	* dict.h, dict.h: Remove include of <stdint.h>.
 
-2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
+2021-03-22  thatlittlegit  <duncan82013@live.ca>
 	Separate the libopcodes backend into a separate file.
 
 	Now, more backends can be fairly easily added. I'll need to do some
@@ -46,7 +46,7 @@
 	* backend.h: Add a header for uu_backend.
 	* meson.build: Also build backend/libopcodes.c.
 
-2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
+2021-03-22  thatlittlegit  <duncan82013@live.ca>
 	Only remove the symbol from the table when we see it.
 
 	We wouldn't reset fprintf_data.value, and therefore we would call
@@ -55,7 +55,7 @@
 
 	* unused.c: Reset fprintf_data.value between iterations.
 
-2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
+2021-03-22  thatlittlegit  <duncan82013@live.ca>
 	Only buffer the disassembly if we're actually going to look at it.
 
 	We used to need to do all of this, but now with fake_fprintf there's
@@ -63,13 +63,13 @@
 
 	* unused.c: Only buffer disassembly if needed.
 
-2021-03-22  thatlittlegit  <personal@thatlittlegit.tk>
+2021-03-22  thatlittlegit  <duncan82013@live.ca>
 	Reorganize fake_fprintf a little. No real change, found when trying to
 	optimize (unsuccessfully).
 
 	* unused.c: Reorganize fake_fprintf
 
-2021-03-21  thatlittlegit  <personal@thatlittlegit.tk>
+2021-03-21  thatlittlegit  <duncan82013@live.ca>
 	Only fprintf to debug if we're actually in debug mode.
 
 	It turns out this saves 7s with libxul!
@@ -79,7 +79,7 @@
 	* unused.c: Use debug() instead of fprintf(debug).
 	* meson.build: Build debug.c.
 
-2021-03-21  thatlittlegit  <personal@thatlittlegit.tk>
+2021-03-21  thatlittlegit  <duncan82013@live.ca>
 	Use a dictionary to keep track of functions instead of lists.
 
 	This means that we no longer have to look through the list of symbols
@@ -90,7 +90,7 @@
 	* unused.c: Use a dictionary instead of arrays to store symbols.
 	* meson.build: Build dict.c.
 
-2021-03-21  thatlittlegit  <personal@thatlittlegit.tk>
+2021-03-21  thatlittlegit  <duncan82013@live.ca>
 	Use a custom function to replace fprintf unless we're in debug mode.
 
 	fake_fprintf() avoids running fprintf, and it is a lot faster! I found
@@ -100,7 +100,7 @@
 
 	* unused.c: Use a custom function to replace fprintf.
 
-2021-03-21  thatlittlegit  <personal@thatlittlegit.tk>
+2021-03-21  thatlittlegit  <duncan82013@live.ca>
 	Allows compilation with C++. This isn't very well supported by Meson
 	at this point, but it does mean that we meet higher type-safety
 	standards. I mean, we cast everything, but oh well.
@@ -108,18 +108,18 @@
 	* unused.c: Allow compilation with C++ by adding casts on
 	reallocarray.
 
-2021-03-19  thatlittlegit  <personal@thatlittlegit.tk>
+2021-03-19  thatlittlegit  <duncan82013@live.ca>
 	Fixes the debug FILE* not having correct permissions, or a potential
 	segfault if /dev/null can't be opened for some reason.
 
 	* unused.c: Fix the debug stream's permissions and error handling.
 
-2021-03-19  thatlittlegit  <personal@thatlittlegit.tk>
+2021-03-19  thatlittlegit  <duncan82013@live.ca>
 	Fixes some memory leaks in unused.c.
 
 	* unused.c: Fix some memory leaks.
 
-2021-03-18  thatlittlegit  <personal@thatlittlegit.tk>
+2021-03-18  thatlittlegit  <duncan82013@live.ca>
 	Migrate to ANSI C. Why? Why not?
 
 	One inspiration for this was the Hundred Rabbits <https://100r.co>,
@@ -133,7 +133,7 @@
 	to various functions that aren't available in C89 by default.
 	* meson.build: Use c89 as the default C standard version.
 
-2021-03-18  thatlittlegit  <personal@thatlittlegit.tk>
+2021-03-18  thatlittlegit  <duncan82013@live.ca>
 	This adds disassembly so then we can actually see what symbols are
 	actually being used. Frankly, it's surprisingly close to done at this
 	point! :D
@@ -141,7 +141,7 @@
 	* unused.c: Use libopcodes to do disassembly.
 	* meson.build: Add libopcodes as a dependency.
 
-2021-03-18  thatlittlegit  <personal@thatlittlegit.tk>
+2021-03-18  thatlittlegit  <duncan82013@live.ca>
 
 	* .clang-format: Add basic clang-format file with some alright formatting.
 	* meson.build: Add initial Meson build file.
