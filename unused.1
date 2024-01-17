@@ -1,0 +1,53 @@
+.\" Copyright 2024 Duncan McIntosh
+.\" SPDX-License-Identifier: GPL-3.0-only
+.Dd 2024-01-17
+.Dt UNUSED 1
+.Os unused
+.Sh NAME
+.Nm unused
+.Nd suggests unused functions in an executable
+.Sh SYNPOSIS
+.Nm unused
+.Ar file
+.Sh DESCRIPTION
+.Nm unused
+finds unused functions within a native executable by disassembling and
+parsing the result.  The only command-line option accepted is the
+executable to examine.
+.Pp
+The addresses will be printed to standard output when complete. Each
+line corresponds to one function, and there are two tab-separated
+fields: the address within the executable, and the name of the
+function.
+.Sh BUGS
+.Nm unused
+often finds false positives or false negatives. As such, a function
+that
+.Nm unused
+complains about may actually be used, or unused functions may be
+missed; it is more useful as a hint than a hard lint or requirement.
+.Pp
+All unused functions can be reported, even if they are used in other
+build configurations of your program. For example,
+.Fn do_thing
+may only be referred to if
+.Va HAVE_THING_DOER
+is defined. In this case, unused may complain if your program was
+comopiled without that flag, when in rainbow-land it would not. (Note
+that
+.Nm unused
+is completely unaware of source code.)
+.Sh IMPLEMENTATION NOTES
+There are two backends: bddisasm and bfd. There is currently no way to
+determine which build you have, and they can produce somewhat
+different results. Although both should give a general idea, you may
+want to run both to be certain.
+.Sh EXIT STATUS
+.Nm unused
+exits with status 0 if it was successful, and 1 if any error occurred
+(executable did not exist, read failure, invalid file...)
+.Sh EXAMPLES
+To determine if the shell has any unused functions, try:
+.Dl unused /bin/sh
+.Sh AUTHORS
+.An Duncan McIntosh Aq Mt duncan82013@live.ca

@@ -1,4 +1,13 @@
 2024-01-17  Duncan McIntosh  <duncan82013@live.ca>
+	Add some documentation.
+
+	This includes an mdoc-based manual page and README, to try and make
+	the project somewhat more discoverable.
+
+	* unused.1: Simple manual page for the program.
+	* README.md: Introduction to the project.
+
+2024-01-17  Duncan McIntosh  <duncan82013@live.ca>
 	Use updated init_diassemble_info prototype.
 
 	This presumably changed with a recent binutils release, so
